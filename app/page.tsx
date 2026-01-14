@@ -136,46 +136,55 @@ const DogFeedingTracker = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-2 text-center">
-          🐕 Has the dog been fed?
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-5xl md:text-8xl font-bold text-gray-800 mb-2 text-center mt-6 md:mt-8">
+          Has Juney Been Fed?
         </h1>
         <p className="text-center text-gray-600 mb-8">
-          Resets daily at 2:00 AM
+          Automated Juney Feeding Detection System®
         </p>
 
         {/* Two meal cards side by side */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 gap-4 mb-6">
           {/* Breakfast Card */}
-          <div className={`rounded-2xl shadow-2xl p-8 transition-all ${
+          <div className={`rounded-2xl shadow-2xl p-6 transition-all relative overflow-visible ${
             breakfastFed 
               ? 'bg-gradient-to-br from-green-400 to-emerald-500' 
               : currentPeriod === 'breakfast'
               ? 'bg-gradient-to-br from-orange-400 to-red-500 animate-pulse'
               : 'bg-gradient-to-br from-orange-300 to-amber-400'
           }`}>
-            <div className="flex items-center justify-center mb-4">
-              <Coffee className="w-16 h-16 text-white" />
+            {/* Dog image positioned breaking out of the box */}
+            <div className="absolute bottom-12 -left-12 w-48 h-48 md:w-56 md:h-56" style={{ transform: 'rotate(-10deg)' }}>
+              <img 
+                src={breakfastFed ? "/images/happy_01.png" : "/images/sad_01.png"}
+                alt="Dog"
+                className="w-full h-full object-contain drop-shadow-2xl"
+              />
+            </div>
+
+            <div className="flex items-center justify-center mb-3">
+              <Coffee className="w-12 h-12 text-white" />
             </div>
             
-            <h2 className="text-2xl font-bold text-white text-center mb-4">
+            <h2 className="text-xl font-bold text-white text-center mb-3">
               Breakfast
             </h2>
 
-            <div className="flex items-center justify-center mb-4">
+            <div className="flex items-center justify-center mb-3">
               {breakfastFed ? (
-                <Check className="w-12 h-12 text-white" />
+                <Check className="w-10 h-10 text-white" />
               ) : (
-                <X className="w-12 h-12 text-white" />
+                <X className="w-10 h-10 text-white" />
               )}
             </div>
             
             <div className="text-center text-white">
-              <div className="text-xl font-semibold mb-2">
+              <div className="text-lg font-semibold mb-1">
                 {breakfastFed ? 'Fed!' : 'Not Yet'}
               </div>
               {breakfastTime && (
-                <div className="text-lg opacity-90">
+                <div className="text-base opacity-90">
                   at {formatTime(breakfastTime)}
                 </div>
               )}
@@ -186,35 +195,44 @@ const DogFeedingTracker = () => {
           </div>
 
           {/* Dinner Card */}
-          <div className={`rounded-2xl shadow-2xl p-8 transition-all ${
+          <div className={`rounded-2xl shadow-2xl p-6 transition-all relative overflow-visible ${
             dinnerFed 
               ? 'bg-gradient-to-br from-green-400 to-emerald-500' 
               : currentPeriod === 'dinner'
               ? 'bg-gradient-to-br from-orange-400 to-red-500 animate-pulse'
               : 'bg-gradient-to-br from-indigo-400 to-purple-500'
           }`}>
-            <div className="flex items-center justify-center mb-4">
-              <Moon className="w-16 h-16 text-white" />
+            {/* Dog image positioned breaking out of the box */}
+            <div className="absolute -bottom--8 -right-8 w-48 h-48 md:w-56 md:h-56" style={{ transform: 'rotate(10deg)' }}>
+              <img 
+                src={dinnerFed ? "/images/happy_01.png" : "/images/sad_01.png"}
+                alt="Dog"
+                className="w-full h-full object-contain drop-shadow-2xl"
+              />
+            </div>
+
+            <div className="flex items-center justify-center mb-3">
+              <Moon className="w-12 h-12 text-white" />
             </div>
             
-            <h2 className="text-2xl font-bold text-white text-center mb-4">
+            <h2 className="text-xl font-bold text-white text-center mb-3">
               Dinner
             </h2>
 
-            <div className="flex items-center justify-center mb-4">
+            <div className="flex items-center justify-center mb-3">
               {dinnerFed ? (
-                <Check className="w-12 h-12 text-white" />
+                <Check className="w-10 h-10 text-white" />
               ) : (
-                <X className="w-12 h-12 text-white" />
+                <X className="w-10 h-10 text-white" />
               )}
             </div>
             
             <div className="text-center text-white">
-              <div className="text-xl font-semibold mb-2">
+              <div className="text-lg font-semibold mb-1">
                 {dinnerFed ? 'Fed!' : 'Not Yet'}
               </div>
               {dinnerTime && (
-                <div className="text-lg opacity-90">
+                <div className="text-base opacity-90">
                   at {formatTime(dinnerTime)}
                 </div>
               )}
@@ -238,7 +256,10 @@ const DogFeedingTracker = () => {
           </div>
         )}
 
-
+        {/* Footer */}
+        <div className="mt-8 text-center text-gray-600 text-sm">
+          Updates every 2 minutes • Resets at 2:00 AM daily
+        </div>
 
         {/* Debug: Last Movement */}
         {lastMovement && (
