@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Clock, Check, X } from 'lucide-react';
+import { Coffee, Moon, Check, X, Clock } from 'lucide-react';
 
 const DogFeedingTracker = () => {
-  const [lastFed, setLastFed] = useState<Date | null>(null);
-  const [todayFeedings, setTodayFeedings] = useState<Date[]>([]);
+  const [breakfastFed, setBreakfastFed] = useState(false);
+  const [dinnerFed, setDinnerFed] = useState(false);
+  const [breakfastTime, setBreakfastTime] = useState<Date | null>(null);
+  const [dinnerTime, setDinnerTime] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,7 +21,7 @@ const DogFeedingTracker = () => {
   const fetchFeedingData = async () => {
     try {
       const response = await fetch(
-        'https://raw.githubusercontent.com/bobarke2000/dogfood/main/beacon_events.csv'
+        'https://raw.githubusercontent.com/bobarke2000/dogfood/main/beacon_events.csv?t=' + Date.now()
       );
       
       if (!response.ok) throw new Error('Failed to fetch data');
@@ -27,59 +29,57 @@ const DogFeedingTracker = () => {
       const text = await response.text();
       const lines = text.trim().split('\n');
       
-      // Skip header
-      const events = lines.slice(1).map(line => {
-        const [timestamp] = line.split(',');
-        return new Date(timestamp);
-      }).filter(date => !isNaN(date.getTime()));
+      // Skip header and filter out any comment lines
+      const events = lines.slice(1)
+        .filter(line => !line.startsWith('#'))
+        .map(line => {
+          const [timestamp] = line.split(',');
+          return new Date(timestamp);
+        })
+        .filter(date => !isNaN(date.getTime()));
 
       if (events.length === 0) {
-        setLastFed(null);
-        setTodayFeedings([]);
+        setBreakfastFed(false);
+        setDinnerFed(false);
         setLoading(false);
         return;
       }
 
-      // Sort by most recent first
-      events.sort((a, b) => b.getTime() - a.getTime());
+      // Get today's date at 2am (reset time)
+      const now = new Date();
+      const resetTime = new Date(now);
+      resetTime.setHours(2, 0, 0, 0);
+      
+      // If it's before 2am, we're looking at yesterday's reset
+      if (now.getHours() < 2) {
+        resetTime.setDate(resetTime.getDate() - 1);
+      }
 
-      // Filter for feeding windows (6-10am, 4-9pm)
-      const validFeedings = events.filter(date => {
+      // Filter events since last reset (2am)
+      const todayEvents = events.filter(date => date >= resetTime);
+
+      // Check for breakfast (7am-10am)
+      const breakfastEvents = todayEvents.filter(date => {
         const hour = date.getHours();
-        return (hour >= 6 && hour < 10) || (hour >= 16 && hour < 21);
+        return hour >= 7 && hour < 10;
       });
 
-      if (validFeedings.length > 0) {
-        setLastFed(validFeedings[0]);
+      // Check for dinner (4pm-8pm)
+      const dinnerEvents = todayEvents.filter(date => {
+        const hour = date.getHours();
+        return hour >= 16 && hour < 20;
+      });
 
-        // Get today's feedings
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayEvents = validFeedings.filter(date => {
-          const eventDay = new Date(date);
-          eventDay.setHours(0, 0, 0, 0);
-          return eventDay.getTime() === today.getTime();
-        });
-        setTodayFeedings(todayEvents);
-      }
+      setBreakfastFed(breakfastEvents.length > 0);
+      setDinnerFed(dinnerEvents.length > 0);
+      setBreakfastTime(breakfastEvents.length > 0 ? breakfastEvents[breakfastEvents.length - 1] : null);
+      setDinnerTime(dinnerEvents.length > 0 ? dinnerEvents[dinnerEvents.length - 1] : null);
 
       setLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
       setLoading(false);
     }
-  };
-
-  const getTimeSince = (date: Date) => {
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (hours === 0) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ${minutes}m ago`;
-    const days = Math.floor(hours / 24);
-    return `${days}d ${hours % 24}h ago`;
   };
 
   const formatTime = (date: Date) => {
@@ -90,35 +90,16 @@ const DogFeedingTracker = () => {
     });
   };
 
-  const shouldBeFed = () => {
-    if (!lastFed) return true;
-    
-    const now = new Date();
-    const hour = now.getHours();
-    const lastFedHour = lastFed.getHours();
-    
-    // Morning feeding (6-10am)
-    if (hour >= 6 && hour < 10) {
-      // Check if last feeding was yesterday evening or earlier
-      const morningToday = new Date(now);
-      morningToday.setHours(6, 0, 0, 0);
-      return lastFed < morningToday;
-    }
-    
-    // Evening feeding (4-9pm)
-    if (hour >= 16 && hour < 21) {
-      // Check if last feeding was this morning or earlier
-      const eveningToday = new Date(now);
-      eveningToday.setHours(16, 0, 0, 0);
-      return lastFed < eveningToday;
-    }
-    
-    return false;
+  const getCurrentPeriod = () => {
+    const hour = new Date().getHours();
+    if (hour >= 7 && hour < 10) return 'breakfast';
+    if (hour >= 16 && hour < 20) return 'dinner';
+    return 'none';
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center">
         <div className="text-2xl text-gray-700">Loading...</div>
       </div>
     );
@@ -126,7 +107,7 @@ const DogFeedingTracker = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-xl p-8 max-w-md">
           <div className="text-red-600 text-xl font-semibold mb-2">Error</div>
           <div className="text-gray-700">{error}</div>
@@ -135,73 +116,115 @@ const DogFeedingTracker = () => {
     );
   }
 
-  const needsFeeding = shouldBeFed();
+  const currentPeriod = getCurrentPeriod();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-800 mb-8 text-center">
-          🐕 Dog Feeding Tracker
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 p-4 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-2 text-center">
+          🐕 Has the dog been fed?
         </h1>
+        <p className="text-center text-gray-600 mb-8">
+          Resets daily at 2:00 AM
+        </p>
 
-        {/* Main Status Card */}
-        <div className={`rounded-2xl shadow-2xl p-8 mb-6 ${
-          needsFeeding 
-            ? 'bg-gradient-to-br from-orange-400 to-red-500' 
-            : 'bg-gradient-to-br from-green-400 to-emerald-500'
-        }`}>
-          <div className="flex items-center justify-center mb-4">
-            {needsFeeding ? (
-              <X className="w-20 h-20 text-white" />
-            ) : (
-              <Check className="w-20 h-20 text-white" />
-            )}
-          </div>
-          
-          <div className="text-center text-white">
-            <div className="text-2xl font-semibold mb-2">
-              {needsFeeding ? 'Time to Feed!' : 'All Fed'}
+        {/* Two meal cards side by side */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {/* Breakfast Card */}
+          <div className={`rounded-2xl shadow-2xl p-8 transition-all ${
+            breakfastFed 
+              ? 'bg-gradient-to-br from-green-400 to-emerald-500' 
+              : currentPeriod === 'breakfast'
+              ? 'bg-gradient-to-br from-orange-400 to-red-500 animate-pulse'
+              : 'bg-gradient-to-br from-orange-300 to-amber-400'
+          }`}>
+            <div className="flex items-center justify-center mb-4">
+              <Coffee className="w-16 h-16 text-white" />
             </div>
-            {lastFed ? (
-              <div className="text-lg opacity-90">
-                Last fed {getTimeSince(lastFed)}
+            
+            <h2 className="text-2xl font-bold text-white text-center mb-4">
+              Breakfast
+            </h2>
+
+            <div className="flex items-center justify-center mb-4">
+              {breakfastFed ? (
+                <Check className="w-12 h-12 text-white" />
+              ) : (
+                <X className="w-12 h-12 text-white" />
+              )}
+            </div>
+            
+            <div className="text-center text-white">
+              <div className="text-xl font-semibold mb-2">
+                {breakfastFed ? 'Fed!' : 'Not Yet'}
               </div>
-            ) : (
-              <div className="text-lg opacity-90">
-                No feedings recorded yet
+              {breakfastTime && (
+                <div className="text-lg opacity-90">
+                  at {formatTime(breakfastTime)}
+                </div>
+              )}
+              <div className="text-sm opacity-75 mt-2">
+                7:00 AM - 10:00 AM
               </div>
-            )}
+            </div>
+          </div>
+
+          {/* Dinner Card */}
+          <div className={`rounded-2xl shadow-2xl p-8 transition-all ${
+            dinnerFed 
+              ? 'bg-gradient-to-br from-green-400 to-emerald-500' 
+              : currentPeriod === 'dinner'
+              ? 'bg-gradient-to-br from-orange-400 to-red-500 animate-pulse'
+              : 'bg-gradient-to-br from-indigo-400 to-purple-500'
+          }`}>
+            <div className="flex items-center justify-center mb-4">
+              <Moon className="w-16 h-16 text-white" />
+            </div>
+            
+            <h2 className="text-2xl font-bold text-white text-center mb-4">
+              Dinner
+            </h2>
+
+            <div className="flex items-center justify-center mb-4">
+              {dinnerFed ? (
+                <Check className="w-12 h-12 text-white" />
+              ) : (
+                <X className="w-12 h-12 text-white" />
+              )}
+            </div>
+            
+            <div className="text-center text-white">
+              <div className="text-xl font-semibold mb-2">
+                {dinnerFed ? 'Fed!' : 'Not Yet'}
+              </div>
+              {dinnerTime && (
+                <div className="text-lg opacity-90">
+                  at {formatTime(dinnerTime)}
+                </div>
+              )}
+              <div className="text-sm opacity-75 mt-2">
+                4:00 PM - 8:00 PM
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Today's Feedings */}
-        {todayFeedings.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-              <Clock className="w-5 h-5 mr-2" />
-              Today's Feedings
-            </h2>
-            <div className="space-y-2">
-              {todayFeedings.map((feeding, idx) => (
-                <div 
-                  key={idx}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                >
-                  <span className="text-gray-700 font-medium">
-                    {formatTime(feeding)}
-                  </span>
-                  <span className="text-gray-500 text-sm">
-                    {getTimeSince(feeding)}
-                  </span>
-                </div>
-              ))}
-            </div>
+        {/* Status message */}
+        {currentPeriod !== 'none' && (
+          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+            <Clock className="w-8 h-8 mx-auto mb-2 text-orange-500" />
+            <p className="text-lg text-gray-700">
+              {currentPeriod === 'breakfast' && !breakfastFed && "It's breakfast time!"}
+              {currentPeriod === 'breakfast' && breakfastFed && "Breakfast complete ✓"}
+              {currentPeriod === 'dinner' && !dinnerFed && "It's dinner time!"}
+              {currentPeriod === 'dinner' && dinnerFed && "Dinner complete ✓"}
+            </p>
           </div>
         )}
 
         {/* Footer */}
         <div className="mt-8 text-center text-gray-600 text-sm">
-          Auto-refreshes every 2 minutes • Shows 6-10am and 4-9pm feedings only
+          Updates every 2 minutes • Resets at 2:00 AM daily
         </div>
       </div>
     </div>
