@@ -181,7 +181,7 @@ const DogFeedingTracker = () => {
             
             <div className="text-center text-white">
               <div className="text-lg font-semibold mb-1">
-                {breakfastFed ? 'Fed!' : 'Not Yet'}
+                {breakfastFed ? 'Yes!' : 'Not Yet'}
               </div>
               {breakfastTime && (
                 <div className="text-base opacity-90">
@@ -229,7 +229,7 @@ const DogFeedingTracker = () => {
             
             <div className="text-center text-white">
               <div className="text-lg font-semibold mb-1">
-                {dinnerFed ? 'Fed!' : 'Not Yet'}
+                {dinnerFed ? 'Yes!' : 'Not Yet'}
               </div>
               {dinnerTime && (
                 <div className="text-base opacity-90">
