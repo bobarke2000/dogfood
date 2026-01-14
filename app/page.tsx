@@ -137,10 +137,10 @@ const DogFeedingTracker = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 p-4 md:p-8">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-4xl md:text-8xl font-bold text-gray-800 mb-2 text-center mt-6 md:mt-8">
+        <h1 className="text-4xl md:text-8xl font-bold text-gray-800 mb-0 text-center mt-4 md:mt-8">
           Has Juney Been Fed?
         </h1>
-        <p className="text-center text-gray-600 mb-8">
+        <p className="text-center text-gray-600 mb-4">
           Automated Juney Feeding Detection System®
         </p>
 
@@ -155,7 +155,7 @@ const DogFeedingTracker = () => {
               : 'bg-gradient-to-br from-orange-300 to-amber-400'
           }`}>
             {/* Dog image positioned breaking out of the box */}
-            <div className="absolute bottom-12 -left-12 w-48 h-48 md:w-56 md:h-56" style={{ transform: 'rotate(-10deg)' }}>
+            <div className="absolute bottom-16 -left-12 w-48 h-48 md:w-56 md:h-56" style={{ transform: 'rotate(-10deg)' }}>
               <img 
                 src={breakfastFed ? "/images/happy_01.png" : "/images/sad_01.png"}
                 alt="Dog"
