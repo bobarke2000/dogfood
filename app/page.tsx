@@ -189,7 +189,7 @@ const DogFeedingTracker = () => {
                 </div>
               )}
               <div className="text-sm opacity-75 mt-2">
-                7:00 AM - 10:00 AM
+                Detection window 7:00 AM - 10:00 AM
               </div>
             </div>
           </div>
@@ -237,7 +237,7 @@ const DogFeedingTracker = () => {
                 </div>
               )}
               <div className="text-sm opacity-75 mt-2">
-                4:00 PM - 8:00 PM
+                Detection window 4:00 PM - 8:00 PM
               </div>
             </div>
           </div>
