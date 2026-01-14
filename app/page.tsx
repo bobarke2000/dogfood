@@ -8,6 +8,7 @@ const DogFeedingTracker = () => {
   const [dinnerFed, setDinnerFed] = useState(false);
   const [breakfastTime, setBreakfastTime] = useState<Date | null>(null);
   const [dinnerTime, setDinnerTime] = useState<Date | null>(null);
+  const [lastMovement, setLastMovement] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,9 +42,14 @@ const DogFeedingTracker = () => {
       if (events.length === 0) {
         setBreakfastFed(false);
         setDinnerFed(false);
+        setLastMovement(null);
         setLoading(false);
         return;
       }
+
+      // Set last movement (most recent event regardless of time window)
+      events.sort((a, b) => b.getTime() - a.getTime());
+      setLastMovement(events[0]);
 
       // Get today's date at 2am (reset time)
       const now = new Date();
@@ -84,6 +90,16 @@ const DogFeedingTracker = () => {
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  };
+
+  const formatFullDateTime = (date: Date) => {
+    return date.toLocaleString('en-US', { 
+      month: 'short',
+      day: 'numeric',
       hour: 'numeric', 
       minute: '2-digit',
       hour12: true 
@@ -226,6 +242,16 @@ const DogFeedingTracker = () => {
         <div className="mt-8 text-center text-gray-600 text-sm">
           Updates every 2 minutes • Resets at 2:00 AM daily
         </div>
+
+        {/* Debug: Last Movement */}
+        {lastMovement && (
+          <div className="mt-4 bg-gray-100 rounded-lg p-4 text-center">
+            <div className="text-xs text-gray-500 mb-1">Last Movement Detected</div>
+            <div className="text-sm font-mono text-gray-700">
+              {formatFullDateTime(lastMovement)}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
