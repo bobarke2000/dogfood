@@ -137,7 +137,7 @@ const DogFeedingTracker = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 p-4 md:p-8">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-5xl md:text-8xl font-bold text-gray-800 mb-2 text-center mt-6 md:mt-8">
+        <h1 className="text-4xl md:text-8xl font-bold text-gray-800 mb-2 text-center mt-6 md:mt-8">
           Has Juney Been Fed?
         </h1>
         <p className="text-center text-gray-600 mb-8">
