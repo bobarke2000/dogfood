@@ -150,8 +150,6 @@ const DogFeedingTracker = () => {
           <div className={`rounded-2xl shadow-2xl p-6 transition-all relative overflow-visible ${
             breakfastFed 
               ? 'bg-gradient-to-br from-green-400 to-emerald-500' 
-              : currentPeriod === 'breakfast'
-              ? 'bg-gradient-to-br from-orange-400 to-red-500 animate-pulse'
               : 'bg-gradient-to-br from-orange-300 to-amber-400'
           }`}>
             {/* Dog image positioned breaking out of the box */}
@@ -159,7 +157,7 @@ const DogFeedingTracker = () => {
               <img 
                 src={breakfastFed ? "/images/happy_01.png" : "/images/sad_01.png"}
                 alt="Dog"
-                className="w-full h-full object-contain drop-shadow-2xl"
+                className="w-full h-full object-contain"
               />
             </div>
 
@@ -198,8 +196,6 @@ const DogFeedingTracker = () => {
           <div className={`rounded-2xl shadow-2xl p-6 transition-all relative overflow-visible ${
             dinnerFed 
               ? 'bg-gradient-to-br from-green-400 to-emerald-500' 
-              : currentPeriod === 'dinner'
-              ? 'bg-gradient-to-br from-orange-400 to-red-500 animate-pulse'
               : 'bg-gradient-to-br from-indigo-400 to-purple-500'
           }`}>
             {/* Dog image positioned breaking out of the box */}
@@ -207,7 +203,7 @@ const DogFeedingTracker = () => {
               <img 
                 src={dinnerFed ? "/images/happy_01.png" : "/images/sad_01.png"}
                 alt="Dog"
-                className="w-full h-full object-contain drop-shadow-2xl"
+                className="w-full h-full object-contain"
               />
             </div>
 
@@ -242,19 +238,6 @@ const DogFeedingTracker = () => {
             </div>
           </div>
         </div>
-
-        {/* Status message */}
-        {currentPeriod !== 'none' && (
-          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <Clock className="w-8 h-8 mx-auto mb-2 text-orange-500" />
-            <p className="text-lg text-gray-700">
-              {currentPeriod === 'breakfast' && !breakfastFed && "It's breakfast time!"}
-              {currentPeriod === 'breakfast' && breakfastFed && "Breakfast complete ✓"}
-              {currentPeriod === 'dinner' && !dinnerFed && "It's dinner time!"}
-              {currentPeriod === 'dinner' && dinnerFed && "Dinner complete ✓"}
-            </p>
-          </div>
-        )}
 
         {/* Footer */}
         <div className="mt-8 text-center text-gray-600 text-sm">
