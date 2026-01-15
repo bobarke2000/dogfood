@@ -241,7 +241,7 @@ const DogFeedingTracker = () => {
 
         {/* Footer */}
         <div className="mt-8 text-center text-gray-600 text-sm">
-          Resets at 2:00 AM daily
+          Resets at 2:00 AM daily Update
         </div>
 
         {/* Debug: Last Movement */}
