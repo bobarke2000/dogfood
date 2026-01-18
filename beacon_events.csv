@@ -37,3 +37,5 @@ timestamp,beacon_mac,motion_flag,event
 2026-01-17T09:17:39-08:00,C8:5B:DF:4A:E0:24,59,feeding
 2026-01-17T13:01:17-08:00,C8:5B:DF:4A:E0:24,5,feeding
 2026-01-17T18:32:42-08:00,C8:5B:DF:4A:E0:24,5,feeding
+2026-01-17T19:15:29-08:00,C8:5B:DF:4A:E0:24,1,movement
+2026-01-17T19:20:31-08:00,C8:5B:DF:4A:E0:24,1,movement
