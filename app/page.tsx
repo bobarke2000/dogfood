@@ -179,8 +179,8 @@ const DogFeedingTracker = () => {
             <span>O</span>
             <span>F</span>
           </h1>
-          <p className="flex justify-between text-zinc-300 text-l uppercase mt-2">
-            <span>Wireless Observation Of Feeding - Juney Bjarke</span>
+          <p className="text-zinc-300 text-l uppercase mt-2 text-center tracking-wider">
+            Wireless Observation Of Feeding - Juney Bjarke
           </p>
           <div className={`
             inline-block mt-3 px-2 py-0.5 rounded-full text-xs font-medium
