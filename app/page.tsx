@@ -179,7 +179,7 @@ const DogFeedingTracker = () => {
             <span>O</span>
             <span>F</span>
           </h1>
-          <p className="text-zinc-300 text-l uppercase mt-2 text-center tracking-wider">
+          <p className="text-zinc-300 text-m uppercase mt-2 text-center tracking-wider">
             Wireless Observation Of Feeding - Juney Bjarke
           </p>
           <div className={`
