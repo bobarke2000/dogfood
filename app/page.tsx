@@ -179,7 +179,10 @@ const DogFeedingTracker = () => {
             <span>O</span>
             <span>F</span>
           </h1>
-          <p className="text-zinc-300 text-m uppercase mt-2 text-center tracking-wider">
+          <p
+            className="text-zinc-300 uppercase mt-2 text-center tracking-wider whitespace-nowrap"
+            style={{ fontSize: 'clamp(0.6rem, 3.8vw, 1rem)' }}
+          >
             Wireless Observation Of Feeding - Juney Bjarke
           </p>
           <div className={`
