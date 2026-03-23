@@ -174,7 +174,7 @@ const DogFeedingTracker = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="flex justify-between items-center text-white leading-none text-9xl sm:text-8xl md:text-9l" style={{ fontFamily: 'var(--font-anton)' }}>
-            <img src="/logo_01.png" alt="Logo" className="h-[0.875em] w-auto" />
+            <img src="/LOGO_01.png" alt="Logo" className="h-[0.875em] w-auto" />
             <span>W</span>
             <span>O</span>
             <span>O</span>
