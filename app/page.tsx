@@ -173,7 +173,8 @@ const DogFeedingTracker = () => {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="flex justify-between text-white leading-none text-9xl sm:text-8xl md:text-9l" style={{ fontFamily: 'var(--font-anton)' }}>
+          <h1 className="flex justify-between items-center text-white leading-none text-9xl sm:text-8xl md:text-9l" style={{ fontFamily: 'var(--font-anton)' }}>
+            <img src="/logo_01.png" alt="Logo" className="h-[0.875em] w-auto" />
             <span>W</span>
             <span>O</span>
             <span>O</span>
@@ -230,7 +231,7 @@ const DogFeedingTracker = () => {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-zinc-500 text-xs font-medium tracking-wider uppercase mb-1">
-                  Last Detection
+                  Last Movement Detection
                 </div>
                 <div className="text-zinc-300 font-medium">
                   {formatTime(lastMovement)}
