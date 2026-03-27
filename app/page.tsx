@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 const DogFeedingTracker = () => {
   const [breakfastFed, setBreakfastFed] = useState(false);
@@ -251,19 +251,7 @@ const DogFeedingTracker = () => {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="flex justify-between items-center text-white leading-none text-7xl sm:text-8xl md:text-9xl" style={{ fontFamily: 'var(--font-anton)' }}>
-            <img src="/LOGO_01.png" alt="Logo" className="h-[0.865em] w-auto" />
-            <span>W</span>
-            <span>O</span>
-            <span>O</span>
-            <span>F</span>
-          </h1>
-          <p
-            className="text-zinc-300 uppercase mt-2 text-center tracking-wider whitespace-nowrap"
-            style={{ fontSize: 'clamp(0.6rem, 3.8vw, 1rem)' }}
-          >
-            Wireless Observation Of Feeding - Juney Bjarke
-          </p>
+          <img src="/LOGO_02.png" alt="WOOF" className="w-full" />
           <div className={`
             inline-block mt-3 px-2 py-0.5 rounded-full text-xs font-medium
             ${totalFed === 2
