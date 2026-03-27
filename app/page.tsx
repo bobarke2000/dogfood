@@ -11,6 +11,14 @@ const DogFeedingTracker = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [streak, setStreak] = useState(0);
+  const [avgBreakfastTime, setAvgBreakfastTime] = useState<Date | null>(null);
+  const [avgDinnerTime, setAvgDinnerTime] = useState<Date | null>(null);
+  const [earliestBreakfast, setEarliestBreakfast] = useState<Date | null>(null);
+  const [latestBreakfast, setLatestBreakfast] = useState<Date | null>(null);
+  const [earliestDinner, setEarliestDinner] = useState<Date | null>(null);
+  const [latestDinner, setLatestDinner] = useState<Date | null>(null);
+
   useEffect(() => {
     fetchFeedingData();
     const interval = setInterval(fetchFeedingData, 120000);
@@ -50,7 +58,6 @@ const DogFeedingTracker = () => {
       const now = new Date();
       const resetTime = new Date(now);
       resetTime.setHours(2, 0, 0, 0);
-
       if (now.getHours() < 2) {
         resetTime.setDate(resetTime.getDate() - 1);
       }
@@ -61,7 +68,6 @@ const DogFeedingTracker = () => {
         const hour = date.getHours();
         return hour >= 7 && hour < 12;
       });
-
       const dinnerEvents = todayEvents.filter(date => {
         const hour = date.getHours();
         return hour >= 16 && hour < 22;
@@ -71,6 +77,78 @@ const DogFeedingTracker = () => {
       setDinnerFed(dinnerEvents.length > 0);
       setBreakfastTime(breakfastEvents.length > 0 ? breakfastEvents[breakfastEvents.length - 1] : null);
       setDinnerTime(dinnerEvents.length > 0 ? dinnerEvents[dinnerEvents.length - 1] : null);
+
+      // --- Stats ---
+
+      // Helper: get feeding day key (days reset at 2am)
+      const getFeedingDayKey = (date: Date): string => {
+        const d = new Date(date);
+        if (d.getHours() < 2) d.setDate(d.getDate() - 1);
+        return d.toISOString().slice(0, 10);
+      };
+
+      // Group events by feeding day and meal
+      const eventsByDay = new Map<string, { breakfast: Date[]; dinner: Date[] }>();
+      for (const event of events) {
+        const key = getFeedingDayKey(event);
+        if (!eventsByDay.has(key)) eventsByDay.set(key, { breakfast: [], dinner: [] });
+        const hour = event.getHours();
+        if (hour >= 7 && hour < 12) eventsByDay.get(key)!.breakfast.push(event);
+        else if (hour >= 16 && hour < 22) eventsByDay.get(key)!.dinner.push(event);
+      }
+
+      // Streak: consecutive days with both meals, going back from yesterday, +1 if today complete
+      const todayKey = getFeedingDayKey(now);
+      let streakCount = 0;
+      const checkDate = new Date(now);
+      if (checkDate.getHours() < 2) checkDate.setDate(checkDate.getDate() - 1);
+      checkDate.setDate(checkDate.getDate() - 1); // start from yesterday
+      let key = checkDate.toISOString().slice(0, 10);
+      while (true) {
+        const day = eventsByDay.get(key);
+        if (day && day.breakfast.length > 0 && day.dinner.length > 0) {
+          streakCount++;
+          const d = new Date(key + 'T12:00:00');
+          d.setDate(d.getDate() - 1);
+          key = d.toISOString().slice(0, 10);
+        } else {
+          break;
+        }
+      }
+      const todayDay = eventsByDay.get(todayKey);
+      if (todayDay && todayDay.breakfast.length > 0 && todayDay.dinner.length > 0) {
+        streakCount++;
+      }
+      setStreak(streakCount);
+
+      // Average breakfast/dinner times over last 7 days
+      const sevenDaysAgo = new Date(now);
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      const recentBreakfasts = events.filter(d => d >= sevenDaysAgo && d.getHours() >= 7 && d.getHours() < 12);
+      const recentDinners = events.filter(d => d >= sevenDaysAgo && d.getHours() >= 16 && d.getHours() < 22);
+
+      const avgMins = (dates: Date[]): Date | null => {
+        if (dates.length === 0) return null;
+        const total = dates.reduce((sum, d) => sum + d.getHours() * 60 + d.getMinutes(), 0);
+        const mins = Math.round(total / dates.length);
+        const result = new Date();
+        result.setHours(Math.floor(mins / 60), mins % 60, 0, 0);
+        return result;
+      };
+
+      setAvgBreakfastTime(avgMins(recentBreakfasts));
+      setAvgDinnerTime(avgMins(recentDinners));
+
+      // Earliest/latest ever
+      const allBreakfasts = events.filter(d => d.getHours() >= 7 && d.getHours() < 12);
+      const allDinners = events.filter(d => d.getHours() >= 16 && d.getHours() < 22);
+      const tod = (d: Date) => d.getHours() * 60 + d.getMinutes();
+
+      setEarliestBreakfast(allBreakfasts.length > 0 ? allBreakfasts.reduce((m, d) => tod(d) < tod(m) ? d : m) : null);
+      setLatestBreakfast(allBreakfasts.length > 0 ? allBreakfasts.reduce((m, d) => tod(d) > tod(m) ? d : m) : null);
+      setEarliestDinner(allDinners.length > 0 ? allDinners.reduce((m, d) => tod(d) < tod(m) ? d : m) : null);
+      setLatestDinner(allDinners.length > 0 ? allDinners.reduce((m, d) => tod(d) > tod(m) ? d : m) : null);
 
       setLoading(false);
     } catch (err) {
@@ -227,7 +305,7 @@ const DogFeedingTracker = () => {
 
         {/* Last activity */}
         {lastMovement && (
-          <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-4">
+          <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-4 mb-6">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-zinc-500 text-xs font-medium tracking-wider uppercase mb-1">
@@ -245,6 +323,72 @@ const DogFeedingTracker = () => {
             </div>
           </div>
         )}
+
+        {/* Stats */}
+        <div className="space-y-3">
+          <div className="text-zinc-600 text-xs font-medium tracking-wider uppercase">Stats</div>
+
+          {/* Streak */}
+          <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-4">
+            <div className="text-zinc-500 text-xs font-medium tracking-wider uppercase mb-2">Streak</div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold text-zinc-200">{streak}</span>
+              <span className="text-zinc-500 text-sm">consecutive days with both meals</span>
+            </div>
+          </div>
+
+          {/* Avg times this week */}
+          <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-4">
+            <div className="text-zinc-500 text-xs font-medium tracking-wider uppercase mb-3">Avg this week</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-zinc-600 text-xs mb-1">Breakfast</div>
+                <div className="text-zinc-200 font-medium">
+                  {avgBreakfastTime ? formatTime(avgBreakfastTime) : '—'}
+                </div>
+              </div>
+              <div>
+                <div className="text-zinc-600 text-xs mb-1">Dinner</div>
+                <div className="text-zinc-200 font-medium">
+                  {avgDinnerTime ? formatTime(avgDinnerTime) : '—'}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* All time records */}
+          <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-4">
+            <div className="text-zinc-500 text-xs font-medium tracking-wider uppercase mb-3">All time</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-zinc-600 text-xs mb-2">Breakfast</div>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-zinc-600 text-xs">Earliest</span>
+                    <span className="text-zinc-300 text-sm">{earliestBreakfast ? formatTime(earliestBreakfast) : '—'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-zinc-600 text-xs">Latest</span>
+                    <span className="text-zinc-300 text-sm">{latestBreakfast ? formatTime(latestBreakfast) : '—'}</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div className="text-zinc-600 text-xs mb-2">Dinner</div>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-zinc-600 text-xs">Earliest</span>
+                    <span className="text-zinc-300 text-sm">{earliestDinner ? formatTime(earliestDinner) : '—'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-zinc-600 text-xs">Latest</span>
+                    <span className="text-zinc-300 text-sm">{latestDinner ? formatTime(latestDinner) : '—'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Footer */}
         <div className="mt-8 flex items-center justify-center gap-2 text-zinc-600 text-xs">
